@@ -1,1 +1,0 @@
- done = traci.simulation.getMinExpectedNumber() == 0  # Stop when no vehicles remain
