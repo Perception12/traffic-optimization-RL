@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-03-12 16:49:34 by Eclipse SUMO netedit Version 1.21.0
+<!-- generated on 2025-03-13 00:58:12 by Eclipse SUMO netedit Version 1.21.0
 <neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
-        <sumocfg-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.sumocfg"/>
-        <additional-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.add.xml"/>
-        <route-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.rou.xml"/>
-        <sumo-net-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.net.xml"/>
+        <sumocfg-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_2\four_way_simulation.sumocfg"/>
+        <additional-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_2\four_way_simulation.add.xml"/>
+        <route-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_2\four_way_simulation.rou.xml"/>
+        <data-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_2\four_way_simulation.dat.xml"/>
+        <sumo-net-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_2\four_way_simulation.net.xml"/>
     </input>
 
     <output>
-        <output-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.net.xml"/>
+        <output-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_2\four_way_simulation.net.xml"/>
     </output>
 
     <processing>

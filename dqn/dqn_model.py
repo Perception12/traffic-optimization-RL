@@ -88,7 +88,6 @@ class DQNAgent:
         rewards = torch.tensor(rewards, dtype=torch.float32)
         next_states = torch.tensor(next_states, dtype=torch.float32).view(-1, 4)
         dones = torch.tensor(dones, dtype=torch.float32)
-        print("next_states shape:", next_states.shape)
 
         # Compute Q-values
         q_values = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)

@@ -8,11 +8,11 @@ from traffic_environment import TrafficEnv
 from config import config
 
 # Defining the simulation paths
-config_path = os.path.abspath("../scenarios/scenario_1/four_way_simulation.sumocfg")
+config_path = os.path.abspath("../scenarios/scenario_3/four_way_simulation.sumocfg")
 output_path = "traffic_data.csv"
 
 # Initialize traffic environment
-env = TrafficEnv(config_path, scenario_name="uniform_traffic", max_steps=config.max_steps)
+env = TrafficEnv(config_path, scenario_name="heavy_traffic_EW", max_steps=config.max_steps)
 
 # Intialize DQN Agent
 input_dim = env.observation_space.shape[0]
@@ -47,6 +47,6 @@ for episode in range(config.num_episodes):
 env.close()  # Close SUMO simulation
 
 # Save the trained model
-agent.save_model("dqn_model3.pth")
+agent.save_model("models/dqn_model3.pth")
 
-print("DQN training completed. Model saved to dqn_model3.pth.")
+print("DQN training completed. Model saved for this scenario")

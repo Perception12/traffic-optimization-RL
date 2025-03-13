@@ -1,19 +1,31 @@
 from sarsa_model import SARSAAgent  # Import SARSA agent
-import traci
-import pandas as pd
+import os
+import sys
+from config import config
 
-phases = ["rGrrrGrr", "GrrrGrrr", "rrrGrrrG", "rrGrrrGr"]
-edges = ["north_1", "east_1", "west_1", "south_1"]
-lanes = ["north_1_0", "north_1_1", "east_1_0", "east_1_1", "west_1_0", "west_1_1", "south_1_0", "south_1_1"]
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-agent = SARSAAgent(input_dim=len(edges), output_dim=4)  
-num_episodes = 50
-max_steps = 1500
+from traffic_environment import TrafficEnv
 
 
-for episode in range(num_episodes):
-    traci.start(["sumo", "-c", "four_way_simulation.sumocfg"])
-    traci.simulationStep()
+# Defining the simulation paths
+config_path = os.path.abspath("../scenarios/scenario_2/four_way_simulation.sumocfg")
+output_path = "traffic_data.csv"
+
+# Initialize traffic environment
+env = TrafficEnv(config_path, scenario_name="a2c_heavy_NS", max_steps=config.max_steps)
+
+# Initialize the A2CAgent
+input_dim = env.observation_space.shape[0]
+output_dim = env.action_space.n
+agent = SARSAAgent(input_dim, output_dim)  
+
+
+for episode in range(config.num_episodes):
+    state = env.reset()
+    total_reward = 0
+    done = False
+    step = 0
     
     state = [traci.edge.getWaitingTime(edge) for edge in edges]
     state = [x / 50 for x in state]

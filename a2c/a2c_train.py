@@ -1,58 +1,48 @@
-import traci
 import os
+import sys
 from a2c_model import A2CAgent
+from config import config
 
-# Traffic light phases
-phases = ["rGrrrGrr", "GrrrGrrr", "rrrGrrrG", "rrGrrrGr"]
-edges = ["north_1", "east_1", "west_1", "south_1"]
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Initialize A2C agent
-agent = A2CAgent(input_dim=len(edges), output_dim=len(phases))
-num_episodes = 50
-max_steps = 1500
+from traffic_environment import TrafficEnv
 
-a2c_waiting_times = []
 
-config_path = os.path.abspath("../scenarios/scenario_1/four_way_simulation.sumocfg")
+# Defining the simulation paths
+config_path = os.path.abspath("../scenarios/scenario_2/four_way_simulation.sumocfg")
+output_path = "traffic_data.csv"
 
-for episode in range(num_episodes):
-    sumo_cmd = ["sumo", "-c", config_path]
-    traci.start(sumo_cmd)
+# Initialize traffic environment
+env = TrafficEnv(config_path, scenario_name="a2c_heavy_NS", max_steps=config.max_steps)
 
-    traci.simulationStep()
-    state = [traci.edge.getWaitingTime(edge) for edge in edges]  # Per-edge waiting times
-    state = [x / 50 for x in state]
+# Initialize the A2CAgent
+input_dim = env.observation_space.shape[0]
+output_dim = env.action_space.n
+agent = A2CAgent(input_dim, output_dim)
+
+for episode in range(config.num_episodes):
+    state = env.reset()
     total_reward = 0
+    done = False
     step = 0
-
-    while step < max_steps:
+    
+    while not done:
         action, _ = agent.select_action(state)
-        traci.trafficlight.setRedYellowGreenState("clusterJ3_J4_J6", phases[action])
-        traci.simulationStep()
-
-        # Calculate per-edge waiting time
-        per_edge_waiting_times = [traci.edge.getWaitingTime(edge) for edge in edges]
-        per_edge_waiting_times = [x / 50 for x in per_edge_waiting_times]
+        next_state, reward, done, _ = env.step(action)
         
-        # Calculate reward based on improvement in waiting times
-        reward = -sum(per_edge_waiting_times) / len(per_edge_waiting_times)  # Lower is better
-        total_reward += reward
-        done = traci.simulation.getMinExpectedNumber() == 0
-
-        next_state = per_edge_waiting_times  # Next state is the updated waiting times
         agent.update(state, action, reward, next_state, done)
         state = next_state
 
+        total_reward += reward
+        step += 1
         print(f"Episode {episode}, Step {step}, Action: {action}, Reward: {reward:.2f}")
 
-        step += 1
-        if done:
-            break
+    print(f"Episode {episode} finished with total reward: {total_reward}")
 
-    traci.close()
+env.close()
 
 # Save trained models
-agent.save_model("a2c_actor3.pth", "a2c_critic3.pth")
+agent.save_model("models/a2c_actor2.pth", "models/a2c_critic2.pth")
 
 
 print("A2C simulation completed. Results saved to a2c_results.csv and model saved.")

@@ -55,7 +55,6 @@ class TrafficEnv(gym.Env):
         step_norm = self.current_step / self.max_steps
 
         state = np.array([queue_normalized, speed, phase, step_norm], dtype=np.float32)
-        print("State shape:", state.shape)
         return state
     
     def step(self, action):
