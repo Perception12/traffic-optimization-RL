@@ -1,66 +1,50 @@
-import traci
-import pandas as pd
-import numpy as np
-import csv
+import os
+import sys
+from config import config
 
-# Start SUMO
-sumoCmd = ["sumo", "-c", "four_way_simulation.sumocfg"]
-traci.start(sumoCmd)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Traffic light phases & durations
-phases = ["rGrrrGrr", "GrrrGrrr", "rrrGrrrG", "rrGrrrGr"]
-# phase_durations = [10, 10, 10, 10]  # scenario 1
-phase_durations = [10, 20, 10, 10]  # scenario 2
+from traffic_environment import TrafficEnv
 
+scenario = 3
+# Defining the simulation paths
+config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
+output_path = config.test_output_paths[scenario-1]
+
+# Initialize traffic environment
+env = TrafficEnv(
+    config_path=config_path, 
+    scenario_name=config.scenario_names[scenario-1], 
+    output_path=output_path, 
+    max_steps=config.max_steps,
+    gui=True)
+
+# Initialize the A2CAgent
+input_dim = env.observation_space.shape[0]
+output_dim = env.action_space.n
+
+phase_durations = config.phase_durations[scenario-1]
+
+state = env.reset()
+total_reward = 0
+done = False
 step = 0
-phase_index = 0  
-time_in_phase = 0  
-junction_id = "clusterJ3_J4_J6"
-max_steps = 1000
-max_queue_length = 5
-output_path = ""
+time_in_phase = 0
+phase_index = 0
 
-# Open CSV file for logs
-with open(output_path, 'w', newline="") as file:
-    writer = csv.writer(file)
-    writer.writerow(['Queue length', 'Speed', 'Phase', 'Step', 'Action', 'Reward', 'Total Queue Length'])
-
-
-while step < max_steps:  
-    traci.trafficlight.setRedYellowGreenState(junction_id, phases[phase_index])
-    traci.simulationStep()
-    
-    controlled_lanes = traci.trafficlight.getControlledLanes(junction_id)
-
-    # Phase switching logic
+while not done:
     time_in_phase += 1
     if time_in_phase >= phase_durations[phase_index]:  
-        phase_index = (phase_index + 1) % len(phases)  
-        time_in_phase = 0  
-        
-    # Get queue length (normalized)
-    queue_length = np.mean([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
-
-    # Get average vehicle speed (normalized)
-    vehicle_speeds = [traci.vehicle.getSpeed(veh) for veh in traci.vehicle.getIDList()]
-    speed = np.mean(vehicle_speeds) if vehicle_speeds else 0  # Avoid NaN
-    phase = phase_index / (len(phases)-1)
-    # Normalize step count
-    step_norm = step / max_steps
-    total_queue_length = np.sum([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
+        phase_index = (phase_index + 1) % output_dim
+        time_in_phase = 0 
     
-    reward = -queue_length/max_queue_length
-    print(f"Step {step}: Mean Queue Length = {queue_length:.2f}")
+    print(phase_index)
+    next_state, reward, done, _ = env.step(phase_index)
     
-    state = np.array([queue_length, speed, phase, step_norm])
-    # Save to CSV
-    with open(output_path, "a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([*state, phase_index, reward, total_queue_length])
-        
-        
+    total_reward += reward
+    print(f"Step {step}: Average Queue Length = {-reward:.2f}")
     step += 1
 
-traci.close()
+env.close()
 
-print("Fixed-time simulation completed. Results saved to fixed_time_results.csv.")
+print(f"Fixed Time testing completed for {env.scenario_name}. Results saved")

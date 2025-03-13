@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from traffic_environment import TrafficEnv
 
-scenario = 1
+scenario = 3
 # Defining the simulation paths
 config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
 output_path = config.test_output_paths[scenario-1]
@@ -42,7 +42,7 @@ while not done:
     total_reward += reward
     
     step += 1
-    print(f"Step {step}: Average Queue Length = {-reward:.2f}")
+    print(f"Step {step}: Reward = {reward:.2f}")
 
 env.close()
 

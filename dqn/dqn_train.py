@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from traffic_environment import TrafficEnv
 from config import config
 
-scenario = 1
+scenario = 3
 # Defining the simulation paths
 config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
 output_path = config.output_paths[scenario-1]

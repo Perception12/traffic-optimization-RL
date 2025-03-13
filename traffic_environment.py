@@ -24,7 +24,7 @@ class TrafficEnv(gym.Env):
         # Open CSV file for logs
         with open(self.output_path, 'w', newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(['Queue length', 'Phase', 'Step', 'Action', 'Reward', 'Total Queue Length'])
+            writer.writerow(['Average Queue length', 'Phase', 'Step', 'Action', 'Reward', 'Total Queue Length'])
         
     def reset(self):
         """ Reset the environment and return initial state """
@@ -64,17 +64,9 @@ class TrafficEnv(gym.Env):
         avg_queue_length = np.mean([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
         avg_queue_length = avg_queue_length / self.max_queue_length
         
-        max_queue_length = max([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
-        
         total_queue_length = np.sum([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
-        
-        # check for teleported vehicles
-        teleported_vehicles = traci.vehicle.getTeleportingIDList()
-        if teleported_vehicles:
-            print("Teleported vehicles:", len(teleported_vehicles))
-            reward = -1.5 * len(teleported_vehicles)
-        else:
-            reward = -max_queue_length / self.max_queue_length
+        vehicles_passed = traci.simulation.getArrivedNumber()
+        reward = -avg_queue_length + 0.5 * vehicles_passed
             
         """ Execute an action (change traffic light phase) and return new state, reward, done flag """
         traci.trafficlight.setRedYellowGreenState(self.junction_id, self.phases[action])
