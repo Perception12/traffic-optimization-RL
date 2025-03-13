@@ -7,15 +7,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from traffic_environment import TrafficEnv
 
-
+scenario = 1
 # Defining the simulation paths
-config_path = os.path.abspath("../scenarios/scenario_3/four_way_simulation.sumocfg")
-output_path = "results/heavy_traffic_EW_train_data.csv"
+config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
+output_path = config.output_paths[scenario-1]
 
 # Initialize traffic environment
 env = TrafficEnv(
     config_path=config_path, 
-    scenario_name="heavy_traffic_EW", 
+    scenario_name=config.scenario_names[scenario-1], 
     output_path= output_path, 
     max_steps=config.max_steps
     )
@@ -49,6 +49,6 @@ for episode in range(config.num_episodes):
 
 env.close()
 
-agent.save_model("models/sarsa_model3.pth")
+agent.save_model(f"models/sarsa_model{scenario}.pth")
 
 print(f"SARSA training completed for {env.scenario_name}. Model saved")

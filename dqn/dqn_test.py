@@ -7,12 +7,18 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from traffic_environment import TrafficEnv
 from config import config
 
+scenario = 1
 # Defining the simulation paths
-config_path = os.path.abspath("../scenarios/scenario_3/four_way_simulation.sumocfg")
-output_path = "test_data.csv"
+config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
+output_path = config.test_output_paths[scenario-1]
 
 # Initialize traffic environment
-env = TrafficEnv(config_path, scenario_name="heavy_traffic_EW_test", max_steps=config.max_steps, gui=True)
+env = TrafficEnv(
+    config_path=config_path,
+    output_path=output_path,
+    scenario_name=config.scenario_names[scenario-1],
+    max_steps=config.max_steps, 
+    gui=True)
 
 # Intialize DQN Agent
 input_dim = env.observation_space.shape[0]
@@ -20,7 +26,7 @@ output_dim = env.action_space.n
 agent = DQNAgent(input_dim, output_dim)
 
 # Load the trained model
-agent.load_model("models/dqn_model3.pth")
+agent.load_model(f"models/dqn_model{scenario}.pth")
 
 
 # Run the simulation for 1000 steps
