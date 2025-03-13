@@ -5,25 +5,26 @@ from gym import spaces
 import csv
 
 class TrafficEnv(gym.Env):
-    def __init__(self, config_path: str, scenario_name: str, max_steps=500, junction_id="clusterJ3_J4_J6"):
+    def __init__(self, config_path: str, scenario_name: str, output_path:str, max_steps=500, junction_id="clusterJ3_J4_J6", gui=False):
         super(TrafficEnv, self).__init__()
         
-        self.sumoCmd = ['sumo', '-c', config_path, '--no-step-log', 'true']
+        self.sumo_mode = 'sumo-gui' if gui else 'sumo'
+        self.sumoCmd = [self.sumo_mode, '-c', config_path, '--no-step-log', 'true']
         self.action_space = spaces.Discrete(4)  # 4 possible traffic phases
-        self.observation_space = spaces.Box(low=0, high=1, shape=(4,))  # queue length, speed, phase, step
+        self.observation_space = spaces.Box(low=0, high=1, shape=(10,))  # queue length, phase, step
         self.junction_id = junction_id
         self.max_steps = max_steps
         self.scenario_name = scenario_name
-        self.max_queue_length = 15  # Fixed max queue length for normalization
+        self.max_queue_length = 5  # Fixed max queue length for normalization
         self.current_step = 0
         self.data_log = []
         self.phases = ["rGrrrGrr", "GrrrGrrr", "rrrGrrrG", "rrGrrrGr"]
+        self.output_path = output_path
         
-        self.output_path = f"{scenario_name}_traffic_data.csv"
         # Open CSV file for logs
         with open(self.output_path, 'w', newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(['Queue length', 'Speed', 'Phase', 'Step', 'Action', 'Reward'])
+            writer.writerow(['Queue length', 'Phase', 'Step', 'Action', 'Reward', 'Total Queue Length'])
         
     def reset(self):
         """ Reset the environment and return initial state """
@@ -41,23 +42,40 @@ class TrafficEnv(gym.Env):
         controlled_lanes = traci.trafficlight.getControlledLanes(self.junction_id)
         
         # Get queue length (normalized)
-        queue_length = np.mean([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
-        queue_normalized = min(queue_length / self.max_queue_length, 1.0)  # Cap at 1.0
-        
-        # Get average vehicle speed (normalized)
-        vehicle_speeds = [traci.vehicle.getSpeed(veh) for veh in traci.vehicle.getIDList()]
-        speed = np.mean(vehicle_speeds) if vehicle_speeds else 0  # Avoid NaN
+        queue_length = [traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes]
+            
+        state = [x / self.max_queue_length for x in queue_length]
         
         # Normalize traffic light phase
         phase = self.phases.index(traci.trafficlight.getRedYellowGreenState(self.junction_id)) / (len(self.phases) - 1)
 
         # Normalize step count
         step_norm = self.current_step / self.max_steps
-
-        state = np.array([queue_normalized, speed, phase, step_norm], dtype=np.float32)
+        
+        
+        state.extend([phase, step_norm])
+        state = np.array(state, dtype=np.float32)
         return state
     
     def step(self, action):
+        # Get the sum of all cars waiting before the intersection for testing purposes
+        controlled_lanes = traci.trafficlight.getControlledLanes(self.junction_id)
+        
+        avg_queue_length = np.mean([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
+        avg_queue_length = avg_queue_length / self.max_queue_length
+        
+        max_queue_length = max([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
+        
+        total_queue_length = np.sum([traci.lane.getLastStepHaltingNumber(lane) for lane in controlled_lanes])
+        
+        # check for teleported vehicles
+        teleported_vehicles = traci.vehicle.getTeleportingIDList()
+        if teleported_vehicles:
+            print("Teleported vehicles:", len(teleported_vehicles))
+            reward = -1.5 * len(teleported_vehicles)
+        else:
+            reward = -max_queue_length / self.max_queue_length
+            
         """ Execute an action (change traffic light phase) and return new state, reward, done flag """
         traci.trafficlight.setRedYellowGreenState(self.junction_id, self.phases[action])
     
@@ -67,16 +85,10 @@ class TrafficEnv(gym.Env):
         # Get new state
         state = self.get_state()
 
-        # Reward: minimize queue length (negative reward for higher queue)
-        reward = -state[0]  
-
-        # Save step data
-        self.data_log.append([*state, action, reward])
-
         # Save to CSV
         with open(self.output_path, "a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([*state, action, reward])
+            writer.writerow([avg_queue_length, state[-2], state[-1], action, reward, total_queue_length])
 
         # Check if done
         done = self.current_step >= self.max_steps

@@ -9,11 +9,19 @@ from traffic_environment import TrafficEnv
 
 
 # Defining the simulation paths
-config_path = os.path.abspath("../scenarios/scenario_2/four_way_simulation.sumocfg")
-output_path = "traffic_data.csv"
+scenario = 1 # choose which scenario
+
+scen_path = f"scenario_{scenario}"
+config_path = os.path.abspath(f"../scenarios/{scen_path}/four_way_simulation.sumocfg")
+output_path = config.output_paths[scenario-1]
 
 # Initialize traffic environment
-env = TrafficEnv(config_path, scenario_name="a2c_heavy_NS", max_steps=config.max_steps)
+env = TrafficEnv(
+    config_path=config_path, 
+    output_path=output_path,
+    scenario_name=config.scenario_names[scenario-1], 
+    max_steps=config.max_steps
+    )
 
 # Initialize the A2CAgent
 input_dim = env.observation_space.shape[0]
@@ -35,14 +43,16 @@ for episode in range(config.num_episodes):
 
         total_reward += reward
         step += 1
+        
+        
         print(f"Episode {episode}, Step {step}, Action: {action}, Reward: {reward:.2f}")
 
     print(f"Episode {episode} finished with total reward: {total_reward}")
 
 env.close()
 
-# Save trained models
-agent.save_model("models/a2c_actor2.pth", "models/a2c_critic2.pth")
+
+agent.save_model(f"models/a2c_actor{scenario}.pth", f"models/a2c_critic{scenario}.pth")
 
 
-print("A2C simulation completed. Results saved to a2c_results.csv and model saved.")
+print(f"A2C simulation completed for {env.scenario_name}. Model and results saved.")

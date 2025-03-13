@@ -9,11 +9,16 @@ from traffic_environment import TrafficEnv
 
 
 # Defining the simulation paths
-config_path = os.path.abspath("../scenarios/scenario_2/four_way_simulation.sumocfg")
-output_path = "traffic_data.csv"
+config_path = os.path.abspath("../scenarios/scenario_3/four_way_simulation.sumocfg")
+output_path = "results/heavy_traffic_EW_train_data.csv"
 
 # Initialize traffic environment
-env = TrafficEnv(config_path, scenario_name="a2c_heavy_NS", max_steps=config.max_steps)
+env = TrafficEnv(
+    config_path=config_path, 
+    scenario_name="heavy_traffic_EW", 
+    output_path= output_path, 
+    max_steps=config.max_steps
+    )
 
 # Initialize the A2CAgent
 input_dim = env.observation_space.shape[0]
@@ -27,40 +32,23 @@ for episode in range(config.num_episodes):
     done = False
     step = 0
     
-    state = [traci.edge.getWaitingTime(edge) for edge in edges]
-    state = [x / 50 for x in state]
-    action = agent.select_action(state)
-    total_reward = 0
     
-    for step in range(max_steps):
-        traci.trafficlight.setRedYellowGreenState("clusterJ3_J4_J6", phases[action])
-        traci.simulationStep()
+    while not done:
+        action = agent.select_action(state)
+        next_state, reward, done, _ = env.step(action)
 
-        # Calculate per-edge waiting time
-        per_edge_waiting_times = [traci.edge.getWaitingTime(edge) for edge in edges]
-        per_edge_waiting_times = [x / 50 for x in per_edge_waiting_times]
-        
-        # Calculate reward based on improvement in waiting times
-        reward = -sum(per_edge_waiting_times) / len(per_edge_waiting_times)  # Lower is better
-        total_reward += reward
-
-        next_state = per_edge_waiting_times
         next_action = agent.select_action(next_state)
-
-        done = traci.simulation.getMinExpectedNumber() == 0
 
         agent.update(state, action, reward, next_state, next_action, done)
 
         state, action = next_state, next_action
         total_reward += reward
-
+        
+        step += 1
         print(f"Episode {episode}, Step {step}, Action: {action}, Reward: {reward}")
 
-        if done:
-            break
+env.close()
 
-    traci.close()
+agent.save_model("models/sarsa_model3.pth")
 
-agent.save_model("sarsa_model3.pth")
-
-print("SARSA simulation completed. Model saved")
+print(f"SARSA training completed for {env.scenario_name}. Model saved")

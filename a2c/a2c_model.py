@@ -19,12 +19,12 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.fc1 = nn.Linear(input_dim, 128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, input_dim)  # Value estimates for each edge
+        self.fc3 = nn.Linear(64, 1)  # Value estimates for each edge
         
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
-        return self.fc3(x)  # Per-edge value estimates
+        return self.fc3(x).squeeze(-1)  # Per-edge value estimates
 
 class A2CAgent:
     def __init__(self, input_dim, output_dim, actor_lr=0.001, critic_lr=0.005, gamma=0.99):
@@ -37,22 +37,26 @@ class A2CAgent:
     def select_action(self, state):
         state = torch.FloatTensor(state)
         probs = self.actor(state)
-        action = torch.multinomial(probs, num_samples=1).item()  # Sample action
-        return action, probs[action]  # Return action and its probability
+        action = torch.multinomial(probs, num_samples=1).item()
+        return action, probs.squeeze(0)[action]  # Ensure correct indexing
 
     def update(self, state, action, reward, next_state, done):
         state = torch.FloatTensor(state)
         next_state = torch.FloatTensor(next_state)
 
-        value = self.critic(state)  # Get per-edge values
+        value = self.critic(state)  # Scalar value estimate
         next_value = self.critic(next_state).detach()
-        advantage = reward + (self.gamma * next_value * (1 - done)) - value  # Compute per-edge advantage
 
-        # Actor loss (policy gradient)
-        log_prob = torch.log(self.actor(state)[action])
-        actor_loss = -log_prob * advantage.mean().detach()  # Use mean advantage to update policy
+        # Corrected advantage calculation
+        advantage = (reward - value) + self.gamma * next_value * (1 - done)
 
-        # Critic loss (MSE)
+        # Corrected log probability selection
+        log_prob = torch.log(self.actor(state)[action] + 1e-8)
+
+        # Actor loss: maximize advantage (policy gradient)
+        actor_loss = -log_prob * advantage.detach()
+
+        # Critic loss: minimize MSE loss
         critic_loss = advantage.pow(2).mean()
 
         # Optimize actor

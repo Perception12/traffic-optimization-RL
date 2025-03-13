@@ -33,8 +33,8 @@ class SARSAAgent:
                 return torch.argmax(self.model(torch.FloatTensor(state))).item()  # Exploit
 
     def update(self, state, action, reward, next_state, next_action, done):
-        state_tensor = torch.FloatTensor(state)
-        next_state_tensor = torch.FloatTensor(next_state)
+        state_tensor = torch.tensor(state, dtype=torch.float32)
+        next_state_tensor = torch.tensor(next_state, dtype=torch.float32)
         
         q_values = self.model(state_tensor)
         next_q_values = self.model(next_state_tensor)
@@ -43,7 +43,7 @@ class SARSAAgent:
         next_q_value = next_q_values[next_action] if not done else 0
 
         target = reward + self.gamma * next_q_value
-        loss = self.criterion(q_value, torch.tensor(target))
+        loss = self.criterion(q_value, torch.tensor(target, dtype=torch.float32))
 
         self.optimizer.zero_grad()
         loss.backward()
