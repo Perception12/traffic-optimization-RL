@@ -9,7 +9,7 @@ from traffic_environment import TrafficEnv
 
 
 # Defining the simulation paths
-scenario = 3 # choose which scenario
+scenario = 1 # choose which scenario
 
 scen_path = f"scenario_{scenario}"
 config_path = os.path.abspath(f"../scenarios/{scen_path}/four_way_simulation.sumocfg")

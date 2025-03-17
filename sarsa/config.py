@@ -1,6 +1,6 @@
 class Config:
     num_episodes = 50
-    max_steps = 1000
+    max_steps = 2000
     learning_rate = 0.001
     output_paths = ["results/sarsa_uniform_traffic_train_data.csv", "results/sarsa_heavy_traffic_NS_train_data.csv", "results/sarsa_heavy_traffic_WE_train_data.csv"]
     test_output_paths = ["results/sarsa_uniform_traffic_test_data.csv", "results/sarsa_heavy_traffic_NS_test_data.csv", "results/sarsa_heavy_traffic_WE_test_data.csv"]

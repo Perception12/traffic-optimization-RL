@@ -17,8 +17,7 @@ env = TrafficEnv(
     config_path=config_path, 
     scenario_name=config.scenario_names[scenario-1], 
     output_path=output_path, 
-    max_steps=config.max_steps, 
-    gui=True)
+    max_steps=config.max_steps)
 
 # Initialize the A2CAgent
 input_dim = env.observation_space.shape[0]

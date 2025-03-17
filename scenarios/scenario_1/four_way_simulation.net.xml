@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-03-13 00:55:26 by Eclipse SUMO netedit Version 1.21.0
+<!-- generated on 2025-03-17 12:13:53 by Eclipse SUMO netedit Version 1.21.0
 <neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
@@ -65,33 +65,33 @@
         <lane id=":junction_1_7_0" index="0" speed="9.19" length="19.25" shape="1.73,12.64 2.55,7.36 4.83,3.65 8.57,1.49 13.77,0.89"/>
     </edge>
 
-    <edge id="-E0" from="junction_1" to="J0" priority="-1" length="60.16" shape="3.44,2.18 -62.57,1.63">
-        <lane id="-E0_0" index="0" speed="13.89" length="60.16" shape="-6.94,3.69 -62.58,3.23"/>
+    <edge id="-E0" from="junction_1" to="J0" priority="-1" length="200.00" shape="3.44,2.18 -62.57,1.63">
+        <lane id="-E0_0" index="0" speed="13.89" length="200.00" shape="-6.94,3.69 -62.58,3.23"/>
     </edge>
-    <edge id="-E1" from="junction_1" to="J2" priority="-1" length="60.16" shape="3.33,12.66 2.54,64.02">
-        <lane id="-E1_0" index="0" speed="13.89" length="60.16" shape="4.93,12.68 4.14,64.04"/>
+    <edge id="-E1" from="junction_1" to="J2" priority="-1" length="200.00" shape="3.33,12.66 2.54,64.02">
+        <lane id="-E1_0" index="0" speed="13.89" length="200.00" shape="4.93,12.68 4.14,64.04"/>
     </edge>
-    <edge id="E0.51" from="junction_1" to="J1" priority="-1" length="60.16" shape="3.44,2.18 67.74,4.09">
-        <lane id="E0.51_0" index="0" speed="13.89" length="60.16" shape="13.77,0.89 67.79,2.49"/>
+    <edge id="E0.51" from="junction_1" to="J1" priority="-1" length="200.00" shape="3.44,2.18 67.74,4.09">
+        <lane id="E0.51_0" index="0" speed="13.89" length="200.00" shape="13.77,0.89 67.79,2.49"/>
     </edge>
-    <edge id="E2" from="junction_1" to="J5" priority="-1" length="60.16" shape="3.69,-8.38 5.11,-57.95">
-        <lane id="E2_0" index="0" speed="13.89" length="60.16" shape="2.09,-8.43 3.51,-58.00"/>
+    <edge id="E2" from="junction_1" to="J5" priority="-1" length="200.00" shape="3.69,-8.38 5.11,-57.95">
+        <lane id="E2_0" index="0" speed="13.89" length="200.00" shape="2.09,-8.43 3.51,-58.00"/>
     </edge>
-    <edge id="east_1" from="J1" to="junction_1" priority="-1" length="60.16" shape="67.74,4.09 3.44,2.18">
-        <lane id="east_1_0" index="0" speed="13.89" length="60.16" shape="67.60,8.89 13.58,7.28"/>
-        <lane id="east_1_1" index="1" speed="13.89" length="60.16" shape="67.69,5.69 13.68,4.08"/>
+    <edge id="east_1" from="J1" to="junction_1" priority="-1" length="200.00" shape="67.74,4.09 3.44,2.18">
+        <lane id="east_1_0" index="0" speed="13.89" length="200.00" shape="67.60,8.89 13.58,7.28"/>
+        <lane id="east_1_1" index="1" speed="13.89" length="200.00" shape="67.69,5.69 13.68,4.08"/>
     </edge>
-    <edge id="north_1" from="J2" to="junction_1" priority="-1" length="60.16" shape="2.54,64.02 3.33,12.66">
-        <lane id="north_1_0" index="0" speed="13.89" length="60.16" shape="-2.26,63.95 -1.47,12.59"/>
-        <lane id="north_1_1" index="1" speed="13.89" length="60.16" shape="0.94,64.00 1.73,12.64"/>
+    <edge id="north_1" from="J2" to="junction_1" priority="-1" length="200.00" shape="2.54,64.02 3.33,12.66">
+        <lane id="north_1_0" index="0" speed="13.89" length="200.00" shape="-2.26,63.95 -1.47,12.59"/>
+        <lane id="north_1_1" index="1" speed="13.89" length="200.00" shape="0.94,64.00 1.73,12.64"/>
     </edge>
-    <edge id="south_1" from="J5" to="junction_1" priority="-1" length="60.16" shape="5.53,-59.17 3.69,-8.38">
-        <lane id="south_1_0" index="0" speed="13.89" length="60.16" shape="10.28,-57.76 8.49,-8.21"/>
-        <lane id="south_1_1" index="1" speed="13.89" length="60.16" shape="7.08,-57.87 5.29,-8.32"/>
+    <edge id="south_1" from="J5" to="junction_1" priority="-1" length="200.00" shape="5.53,-59.17 3.69,-8.38">
+        <lane id="south_1_0" index="0" speed="13.89" length="200.00" shape="10.28,-57.76 8.49,-8.21"/>
+        <lane id="south_1_1" index="1" speed="13.89" length="200.00" shape="7.08,-57.87 5.29,-8.32"/>
     </edge>
-    <edge id="west_1" from="J0" to="junction_1" priority="-1" length="60.16" shape="-62.57,1.63 3.44,2.18">
-        <lane id="west_1_0" index="0" speed="13.89" length="60.16" shape="-62.53,-3.17 -6.89,-2.71"/>
-        <lane id="west_1_1" index="1" speed="13.89" length="60.16" shape="-62.56,0.03 -6.92,0.49"/>
+    <edge id="west_1" from="J0" to="junction_1" priority="-1" length="200.00" shape="-62.57,1.63 3.44,2.18">
+        <lane id="west_1_0" index="0" speed="13.89" length="200.00" shape="-62.53,-3.17 -6.89,-2.71"/>
+        <lane id="west_1_1" index="1" speed="13.89" length="200.00" shape="-62.56,0.03 -6.92,0.49"/>
     </edge>
 
     <tlLogic id="clusterJ3_J4_J6" type="static" programID="0" offset="0">

@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from traffic_environment import TrafficEnv
 
-scenario = 3
+scenario = 1
 # Defining the simulation paths
 config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
 output_path = config.test_output_paths[scenario-1]
@@ -16,8 +16,7 @@ env = TrafficEnv(
     config_path=config_path, 
     scenario_name=config.scenario_names[scenario-1], 
     output_path=output_path, 
-    max_steps=config.max_steps,
-    gui=True)
+    max_steps=config.max_steps)
 
 # Initialize the A2CAgent
 input_dim = env.observation_space.shape[0]
