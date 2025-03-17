@@ -17,8 +17,7 @@ env = TrafficEnv(
     config_path=config_path,
     output_path=output_path,
     scenario_name=config.scenario_names[scenario-1],
-    max_steps=config.max_steps, 
-    gui=True)
+    max_steps=config.max_steps)
 
 # Intialize DQN Agent
 input_dim = env.observation_space.shape[0]
