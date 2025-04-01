@@ -43,7 +43,7 @@ class ReplayMemory:
         return random.sample(self.memory, batch_size)
 
 class DQNAgent:
-    def __init__(self, input_dim, output_dim, lr=0.001, gamma=0.99, epsilon=1.0, epsilon_decay=0.995):
+    def __init__(self, input_dim, output_dim, lr=0.01, gamma=0.95, epsilon=1.0, epsilon_decay=0.995):
         # Initialize the DQN model
         self.model = DQN(input_dim, output_dim)
         # Define the optimizer

@@ -1,57 +1,88 @@
-from dqn_model import DQNAgent
 import sys
 import os
+from config import config
+from dqn_model import DQNAgent
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import deque
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from traffic_environment import TrafficEnv
-from config import config
 
-scenario = 3
-# Defining the simulation paths
-config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
+# Setup
+scenario = 1
+config_path = os.path.abspath(
+    f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
 output_path = config.output_paths[scenario-1]
 
-# Initialize traffic environment
+# Initialize environment and agent
 env = TrafficEnv(
-    config_path=config_path, 
+    config_path=config_path,
     output_path=output_path,
-    scenario_name=config.scenario_names[scenario-1], 
+    scenario_name=config.scenario_names[scenario-1],
     max_steps=config.max_steps)
 
-# Intialize DQN Agent
 input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 agent = DQNAgent(input_dim, output_dim)
 
+# Training monitoring
+episode_rewards = []
+moving_avg_rewards = []
+best_avg_reward = -np.inf
+window_size = 50  # For moving average
+reward_history = deque(maxlen=window_size)
 
 # Training loop
 for episode in range(config.num_episodes):
     state = env.reset()
     total_reward = 0
     done = False
-    step = 0
-    
+
     while not done:
-        action = agent.select_action(state) # Choose action from policy
-        next_state, reward, done, _ = env.step(action) # Step through environment
-        
-            
-        agent.update(config.batch_size) # Update agent's Q-network
-        
+        action = agent.select_action(state)
+        next_state, reward, done, _ = env.step(action)
+
+        agent.memory.push(state, action, reward, next_state, done)
+        agent.update(config.batch_size)
+
         state = next_state
         total_reward += reward
-        step += 1
-        
-        print(f"Episode {episode}, Step {step}, Action: {action}")
-        print(f"State: {state}, Next State: {next_state}, Reward: {reward}")
 
-    print(f"Episode {episode} finished with total reward: {total_reward}")
+    # Store and analyze rewards
+    episode_rewards.append(total_reward)
+    reward_history.append(total_reward)
+    moving_avg = np.mean(reward_history)
+    moving_avg_rewards.append(moving_avg)
 
+    # Save best model
+    if moving_avg > best_avg_reward:
+        best_avg_reward = moving_avg
+        agent.save_model(f"models/best_dqn_model_scenario_{scenario}.pth")
 
-env.close()  # Close SUMO simulation
+    # Progress tracking
+    if episode % 20 == 0:
+        agent.save_model(f"models/dqn_model_{episode}.pth")
+        print(f"Episode {episode} | Reward: {total_reward:.2f} | Avg Reward (last {window_size}): {moving_avg:.2f} | Epsilon: {agent.epsilon:.3f}")
 
-# Save the trained model
-agent.save_model(f"models/dqn_model{scenario}.pth")
+    # Early stopping
+    if episode > window_size and moving_avg >= config.target_reward:
+        print(f"Early stopping at episode {episode} - target reward achieved!")
+        break
 
-print(f"DQN training for Scenario {scenario}. Model saved for this scenario")
+# Save final model and plot results
+agent.save_model(f"models/final_dqn_model_scenario_{scenario}.pth")
+env.close()
+
+# Plot training progress
+plt.figure(figsize=(12, 6))
+plt.plot(episode_rewards, label='Episode Reward')
+plt.plot(moving_avg_rewards, label=f'Moving Avg ({window_size} episodes)')
+plt.xlabel('Episode')
+plt.ylabel('Reward')
+plt.title('Training Progress')
+plt.legend()
+plt.savefig(f"results/training_curve_scenario_{scenario}.png")
+plt.close()
+
+print(f"Training completed for Scenario {scenario}")

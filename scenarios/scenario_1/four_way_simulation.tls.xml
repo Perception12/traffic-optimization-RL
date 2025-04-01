@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-03-10 23:43:25 by Eclipse SUMO netedit Version 1.21.0
+<!-- generated on 2025-03-31 14:43:11 by Eclipse SUMO netedit Version 1.21.0
 <neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
-        <sumocfg-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.sumocfg"/>
-        <additional-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.add.xml"/>
-        <route-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.rou.xml"/>
-        <data-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.dat.xml"/>
-        <sumo-net-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\four_way_simulation.net.xml"/>
+        <sumocfg-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_1\four_way_simulation.sumocfg"/>
+        <additional-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_1\four_way_simulation.add.xml"/>
+        <route-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_1\four_way_simulation.rou.xml"/>
+        <data-files value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_1\four_way_simulation.dat.xml"/>
+        <sumo-net-file value="C:\Users\Kenny\Desktop\Conference Paper Writing\simulation\scenarios\scenario_1\four_way_simulation.net.xml"/>
     </input>
 
     <processing>
@@ -33,14 +33,14 @@
 -->
 
 <additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
-    <tlLogic id="clusterJ3_J4_J6" type="static" programID="0" offset="0">
+    <tlLogic id="clusterJ10_J11" type="static" programID="0" offset="0">
         <phase duration="18" state="rGrrrGrr"/>
-        <phase duration="3"  state="ryrrryrr"/>
-        <phase duration="30" state="GrrrGrrr"/>
-        <phase duration="3"  state="yrrryrrr"/>
-        <phase duration="19" state="rrrGrrrG"/>
-        <phase duration="3"  state="rrryrrry"/>
-        <phase duration="30" state="rrGrrrGr"/>
-        <phase duration="3"  state="rryrrryr"/>
+        <phase duration="3"  state="rYrrrYrr"/>
+        <phase duration="20" state="GrrrGrrr"/>
+        <phase duration="3"  state="YrrrYrrr"/>
+        <phase duration="20" state="rrrGrrrG"/>
+        <phase duration="3"  state="rrrYrrrY"/>
+        <phase duration="20" state="rrGrrrGr"/>
+        <phase duration="3"  state="rrYrrrYr"/>
     </tlLogic>
 </additional>
