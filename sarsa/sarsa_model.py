@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
+import os
+import numpy as np
 
 class SARSA(nn.Module):
     def __init__(self, input_dim, output_dim):
@@ -16,22 +18,30 @@ class SARSA(nn.Module):
         return self.fc3(x)  # Q-values for all actions
 
 class SARSAAgent:
-    def __init__(self, input_dim, output_dim, lr=0.001, gamma=0.99, epsilon=1.0, epsilon_decay=0.995):
+    def __init__(self, input_dim, output_dim, lr=0.0001, gamma=0.95, epsilon=1.0, epsilon_decay=0.995):
         self.model = SARSA(input_dim, output_dim)
+        self.input_dim = input_dim
+        self.output_dim = output_dim
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.SmoothL1Loss()
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_decay = epsilon_decay
+        self.min_reward = np.inf
+        self.max_reward = -np.inf
 
     def select_action(self, state):
         if random.random() < self.epsilon:
-            return random.randint(0, 3)  # Explore
+            return random.randint(0, self.output_dim-1)  # Explore
         else:
             with torch.no_grad():
                 return torch.argmax(self.model(torch.FloatTensor(state))).item()  # Exploit
 
     def update(self, state, action, reward, next_state, next_action, done):
+        self.min_reward = min(self.min_reward, reward)
+        self.max_reward = max(self.max_reward, reward)
+        normalized_reward = (reward - self.min_reward) / (self.max_reward - self.min_reward + 1e-5)
+
         state_tensor = torch.tensor(state, dtype=torch.float32)
         next_state_tensor = torch.tensor(next_state, dtype=torch.float32)
         
@@ -41,18 +51,69 @@ class SARSAAgent:
         q_value = q_values[action]
         next_q_value = next_q_values[next_action] if not done else 0
 
-        target = reward + self.gamma * next_q_value
+        target = normalized_reward + self.gamma * next_q_value
         loss = self.criterion(q_value, torch.tensor(target, dtype=torch.float32))
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        self.epsilon *= self.epsilon_decay
+    def save_model(self, path, include_optimizer=False, metadata=None):
+        """
+        Enhanced model saving with additional options
 
-    def save_model(self, path):
+        Args:
+            path (str): File path to save the model
+            include_optimizer (bool): Whether to save optimizer state
+            metadata (dict): Additional metadata to store with the model
+        """
+        save_dict = {
+            'model_state_dict': self.model.state_dict(),
+            'input_dim': self.input_dim,
+            'output_dim': self.output_dim
+            }
+        
+        if include_optimizer:
+            save_dict['optimizer_state_dict'] = self.optimizer.state_dict()
+
+        if metadata:
+            save_dict['metadata'] = metadata
+            
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        
         torch.save(self.model.state_dict(), path)
+        print(f"Model saved successfully to {path}")
 
-    def load_model(self, path):
-        self.model.load_state_dict(torch.load(path))
-        self.model.eval()
+    def load_model(self, path, load_optimizer=False):
+        """
+        Enhanced model loading with safety checks
+
+        Args:
+            path (str): File path to load the model from
+            load_optimizer (bool): Whether to load optimizer state
+        """
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"No model found at {path}")
+
+        try:
+            checkpoint = torch.load(path)
+
+            # Verify model architecture matches
+            if (checkpoint['input_dim'] != self.input_dim or
+                    checkpoint['output_dim'] != self.output_dim):
+                raise ValueError("Model architecture mismatch!")
+
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.model.eval()
+
+            if load_optimizer and 'optimizer_state_dict' in checkpoint:
+                self.optimizer.load_state_dict(
+                    checkpoint['optimizer_state_dict'])
+
+            print(f"Model loaded successfully from {path}")
+            return checkpoint.get('metadata', None)
+
+        except Exception as e:
+            print(f"Error loading model: {str(e)}")
+            raise

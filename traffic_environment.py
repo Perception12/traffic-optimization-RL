@@ -49,10 +49,10 @@ class TrafficEnv(gym.Env):
             self.junction_id)
 
         # Get queue length (normalized)
-        queue_length = [traci.lane.getLastStepHaltingNumber(
-            lane) for lane in controlled_lanes]
+        queue_length = [max(1, traci.lane.getLastStepHaltingNumber(lane))
+                        for lane in controlled_lanes]
 
-        self.max_queue_length = max(5, max(queue_length))
+        self.max_queue_length = max(5, max(queue_length, default=1))
 
         state = [x / self.max_queue_length for x in queue_length]
 
@@ -75,7 +75,7 @@ class TrafficEnv(gym.Env):
         """ Execute an action (change traffic light phase) and return new state, reward, done flag """
         traci.trafficlight.setRedYellowGreenState(
             self.junction_id, self.phases[action])
-        
+
         # Get the sum of all cars waiting before the intersection for testing purposes
         controlled_lanes = traci.trafficlight.getControlledLanes(
             self.junction_id)
@@ -102,15 +102,19 @@ class TrafficEnv(gym.Env):
         # Normalize vehicles_passed
         vehicles_passed = vehicles_passed / self.max_vehicles_passed
 
-        reward = -0.6 * avg_queue_length + 0.2 * vehicles_passed - 0.2 * avg_waiting_time
+        reward = -0.7 * avg_queue_length + 0.3 * \
+            vehicles_passed - 0.2 * avg_waiting_time
 
         # penalize for switching too quickly
         if action != self.previous_action:
-            reward -= 0.03 * avg_queue_length
             self.last_phase_change_step = self.current_step
-
-        print(
-            f"Step: {self.current_step}, Action: {action}, Phase: {self.phases[action]}")
+            
+            
+            switch_penalty = 0.05 * np.sqrt(self.current_step - self.last_phase_change_step)
+            reward -= switch_penalty
+            
+            
+        print(f"[Step {self.current_step}] Action: {action} | Phase: {self.phases[action]} | Reward: {reward:.3f} | Queue: {avg_queue_length:.2f}")
 
         self.previous_action = action
 
@@ -122,14 +126,14 @@ class TrafficEnv(gym.Env):
 
         # Early Termination
         if total_queue_length > 50:
+            reward -= 1.0
             done = True
-            reward -= 1.0  #
         else:
             done = self.current_step >= self.max_steps
             # Save to CSV
 
         # Periodically flush the CSV writer
-        if self.current_step % 100 == 0:
+        if self.current_step % 10 == 0:
             self.file.flush()
 
         self.writer.writerow([avg_queue_length, reward, self.current_step,

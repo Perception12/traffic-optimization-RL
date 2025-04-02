@@ -7,10 +7,13 @@ import matplotlib.pyplot as plt
 from collections import deque
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scenario_parser import parse_arguments
 from traffic_environment import TrafficEnv
 
-# Setup
-scenario = 1
+
+args = parse_arguments()
+scenario = args.scenario
+
 config_path = os.path.abspath(
     f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
 output_path = config.output_paths[scenario-1]
@@ -45,6 +48,8 @@ for episode in range(config.num_episodes):
 
         agent.memory.push(state, action, reward, next_state, done)
         agent.update(config.batch_size)
+        
+        agent.epsilon = max(0.05, agent.epsilon * agent.epsilon_decay)
 
         state = next_state
         total_reward += reward
@@ -60,17 +65,21 @@ for episode in range(config.num_episodes):
         best_avg_reward = moving_avg
         agent.save_model(f"models/best_dqn_model_scenario_{scenario}.pth")
 
-    # Progress tracking
-    if episode % 20 == 0:
-        agent.save_model(f"models/dqn_model_{episode}.pth")
-        print(f"Episode {episode} | Reward: {total_reward:.2f} | Avg Reward (last {window_size}): {moving_avg:.2f} | Epsilon: {agent.epsilon:.3f}")
-
     # Early stopping
     if episode > window_size and moving_avg >= config.target_reward:
         print(f"Early stopping at episode {episode} - target reward achieved!")
         break
 
+    # Progress tracking
+    if episode % 20 == 0:
+        agent.save_model(f"models/dqn_model_{episode}.pth")
+        print(f"Episode {episode} | Reward: {total_reward:.2f} | Avg Reward (last {window_size}): {moving_avg:.2f} | Epsilon: {agent.epsilon:.3f}")
+
+    
 # Save final model and plot results
+print(f"Training completed for Scenario {scenario}")
+print(f"Best Moving Average Reward: {best_avg_reward:.2f}")
+print(f"Final Epsilon: {agent.epsilon:.3f}")
 agent.save_model(f"models/final_dqn_model_scenario_{scenario}.pth")
 env.close()
 

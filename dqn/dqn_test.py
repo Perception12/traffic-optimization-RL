@@ -23,7 +23,7 @@ env = TrafficEnv(
 # Intialize DQN Agent
 input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
-agent = DQNAgent(input_dim, output_dim, epsilon=0.01)  # Set epsilon to a low value for testing
+agent = DQNAgent(input_dim, output_dim, epsilon=0.05)  # Set epsilon to a low value for testing
 
 # Load the trained model
 agent.load_model(f"models/best_dqn_model_scenario_{scenario}.pth")
