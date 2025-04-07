@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-04-06 14:07:05 by Eclipse SUMO netedit Version 1.21.0
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <!-- VTypes -->
+    <vType id="human" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human1" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human2" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human3" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human4" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human5" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human6" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="human7" minGap="2.50" maxSpeed="13.89" accel="1.5" decel="3.0" sigma="0.5"/>
+    <vType id="t_0"/>
+    <!-- Vehicles, persons and containers (sorted by depart) -->
+    <flow id="f_0" type="human1" begin="0.00" from="E0" to="E0.78" end="3600.00" number="350"/>
+    <flow id="f_1" type="human1" begin="0.00" from="E0" to="E1.61" end="3600.00" number="150"/>
+    <flow id="f_2" type="human1" begin="0.00" from="-E0.78" to="-E0" end="3600.00" number="350"/>
+    <flow id="f_3" type="human1" begin="0.00" from="-E0.78" to="-E1" end="3600.00" number="150"/>
+    <flow id="f_4" type="human1" begin="0.00" from="-E1.61" to="-E1" end="3600.00" number="350"/>
+    <flow id="f_5" type="human1" begin="0.00" from="-E1.61" to="E0.78" end="3600.00" number="150"/>
+    <flow id="f_6" type="human1" begin="0.00" from="E1" to="-E0" end="3600.00" number="150"/>
+    <flow id="f_7" type="human1" begin="0.00" from="E1" to="E1.61" end="3600.00" number="350"/>
+</routes>

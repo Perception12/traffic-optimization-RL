@@ -1,6 +1,6 @@
 class Config:
-    num_episodes = 50
-    max_steps = 1000
+    num_episodes = 100
+    max_steps = 3000
     learning_rate = 0.0001
     target_reward = -5.0
     output_paths = ["results/a2c_uniform_traffic_train_data.csv", "results/a2c_heavy_traffic_NS_train_data.csv", "results/a2c_heavy_traffic_WE_train_data.csv"]

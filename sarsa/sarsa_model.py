@@ -58,26 +58,7 @@ class SARSAAgent:
         loss.backward()
         self.optimizer.step()
 
-    def save_model(self, path, include_optimizer=False, metadata=None):
-        """
-        Enhanced model saving with additional options
-
-        Args:
-            path (str): File path to save the model
-            include_optimizer (bool): Whether to save optimizer state
-            metadata (dict): Additional metadata to store with the model
-        """
-        save_dict = {
-            'model_state_dict': self.model.state_dict(),
-            'input_dim': self.input_dim,
-            'output_dim': self.output_dim
-            }
-        
-        if include_optimizer:
-            save_dict['optimizer_state_dict'] = self.optimizer.state_dict()
-
-        if metadata:
-            save_dict['metadata'] = metadata
+    def save_model(self, path):
             
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -85,34 +66,15 @@ class SARSAAgent:
         torch.save(self.model.state_dict(), path)
         print(f"Model saved successfully to {path}")
 
-    def load_model(self, path, load_optimizer=False):
-        """
-        Enhanced model loading with safety checks
-
-        Args:
-            path (str): File path to load the model from
-            load_optimizer (bool): Whether to load optimizer state
-        """
+    def load_model(self, path):
         if not os.path.exists(path):
             raise FileNotFoundError(f"No model found at {path}")
 
         try:
             checkpoint = torch.load(path)
 
-            # Verify model architecture matches
-            if (checkpoint['input_dim'] != self.input_dim or
-                    checkpoint['output_dim'] != self.output_dim):
-                raise ValueError("Model architecture mismatch!")
-
-            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.model.load_state_dict(checkpoint)
             self.model.eval()
-
-            if load_optimizer and 'optimizer_state_dict' in checkpoint:
-                self.optimizer.load_state_dict(
-                    checkpoint['optimizer_state_dict'])
-
-            print(f"Model loaded successfully from {path}")
-            return checkpoint.get('metadata', None)
 
         except Exception as e:
             print(f"Error loading model: {str(e)}")

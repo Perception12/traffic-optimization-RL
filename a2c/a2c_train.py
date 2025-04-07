@@ -36,7 +36,7 @@ agent = A2CAgent(input_dim, output_dim)
 episode_rewards = []
 moving_avg_rewards = []
 best_avg_reward = -np.inf
-window_size = 50  # For moving average
+window_size = 10  # For moving average
 reward_history = deque(maxlen=window_size)
 
 # Training Loop
@@ -63,7 +63,7 @@ for episode in range(config.num_episodes):
    # Save best model
     if moving_avg > best_avg_reward:
         best_avg_reward = moving_avg
-        agent.save_model(f"models/best_a2c_model_scenario_{scenario}.pth")
+        agent.save_model(f"models/best_actor_model_scenario_{scenario}.pth", f"models/best_critic_model_scenario_{scenario}.pth")
 
     # Early stopping
     if episode > window_size and moving_avg >= config.target_reward:
@@ -72,15 +72,14 @@ for episode in range(config.num_episodes):
     
     # Progress tracking
     if episode % 20 == 0:
-        agent.save_model(f"models/a2c_model_{episode}.pth")
-        print(f"Episode {episode} | Reward: {total_reward:.2f} | Avg Reward (last {window_size}): {moving_avg:.2f} | Epsilon: {agent.epsilon:.3f}")
+        agent.save_model(f"models/actor_model_{episode}.pth", f"models/critic_model_{episode}.pth")
+        print(f"Episode {episode} | Reward: {total_reward:.2f} | Avg Reward (last {window_size}): {moving_avg:.2f}")
 
 
 # Save final model and plot results
 print(f"Training completed for Scenario {scenario}")
 print(f"Best Moving Average Reward: {best_avg_reward:.2f}")
-print(f"Final Epsilon: {agent.epsilon:.3f}")
-agent.save_model(f"models/final_a2c_model_scenario_{scenario}.pth")
+agent.save_model(f"models/final_actor_model_scenario_{scenario}.pth", f"models/final_critic_model_scenario_{scenario}.pth")
 env.close()
 
 # Plot training progress
@@ -95,13 +94,3 @@ plt.savefig(f"results/training_curve_scenario_{scenario}.png")
 plt.close()
 
 print(f"Training completed for Scenario {scenario}")
-        
-        
-
-env.close()
-
-
-agent.save_model(f"models/a2c_actor{scenario}.pth", f"models/a2c_critic{scenario}.pth")
-
-
-print(f"A2C simulation completed for {env.scenario_name}. Model and results saved.")

@@ -29,12 +29,13 @@ class Critic(nn.Module):
         return self.fc3(x).squeeze(-1)  # Per-edge value estimates
 
 class A2CAgent:
-    def __init__(self, input_dim, output_dim, actor_lr=0.0001, critic_lr=0.0005, gamma=0.95):
+    def __init__(self, input_dim, output_dim, actor_lr=0.0002, critic_lr=0.0005, gamma=0.95):
         self.actor = Actor(input_dim, output_dim)
         self.critic = Critic(input_dim)
         self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=actor_lr)
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=critic_lr)
         self.gamma = gamma
+        self.critic_loss_fn = nn.SmoothL1Loss()
         self.min_reward = np.inf
         self.max_reward = -np.inf
 
@@ -45,9 +46,6 @@ class A2CAgent:
         return action, probs.squeeze(0)[action]  # Ensure correct indexing
 
     def update(self, state, action, reward, next_state, done):
-        self.min_reward = min(self.min_reward, reward)
-        self.max_reward = max(self.max_reward, reward)
-        normalized_reward = (reward - self.min_reward) / (self.max_reward - self.min_reward + 1e-5)
         
         state = torch.FloatTensor(state)
         next_state = torch.FloatTensor(next_state)
@@ -56,16 +54,20 @@ class A2CAgent:
         next_value = self.critic(next_state).detach()
 
         # Corrected advantage calculation
-        advantage = (normalized_reward - value) + self.gamma * next_value * (1 - done)
+        target = reward + self.gamma * next_value * (1 - done)
+        advantage = target - value
 
         # Corrected log probability selection
-        log_prob = torch.log(self.actor(state)[action] + 1e-8)
+        probs = self.actor(state)
+        dist = torch.distributions.Categorical(probs)
+        log_prob = dist.log_prob(torch.tensor(action))
+        entropy = dist.entropy()
 
         # Actor loss: maximize advantage (policy gradient)
-        actor_loss = -log_prob * advantage.detach()
+        actor_loss = -log_prob * advantage.detach() - 0.01 * entropy
 
-        # Critic loss: minimize MSE loss
-        critic_loss = advantage.pow(2).mean()
+        # Critic loss: SmoothL1 Loss
+        critic_loss = self.critic_loss_fn(value, target.detach())
 
         # Optimize actor
         self.actor_optimizer.zero_grad()

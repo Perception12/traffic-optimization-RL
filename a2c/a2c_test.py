@@ -2,6 +2,9 @@ from a2c_model import A2CAgent  # Import SARSA agent
 import os
 import sys
 from config import config
+from collections import deque
+import numpy as np
+import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -9,7 +12,7 @@ from traffic_environment import TrafficEnv
 
 scenario = 1
 # Defining the simulation paths
-config_path = os.path.abspath(f"../scenarios/scenario_{scenario}/four_way_simulation.sumocfg")
+config_path = os.path.abspath(f"../scenarios/test_scenario/four_way_simulation.sumocfg")
 output_path = config.test_output_paths[scenario-1]
 
 # Initialize traffic environment
@@ -24,24 +27,36 @@ input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 agent = A2CAgent(input_dim, output_dim)
 
-agent.load_model(f"models/a2c_actor{scenario}.pth", f"models/a2c_critic{scenario}.pth")
+agent.load_model(f"models/final_actor_model_scenario_{scenario}.pth", f"models/final_critic_model_scenario_{scenario}.pth")
 
 state = env.reset()
 total_reward = 0
 done = False
-step = 0
+moving_avg_rewards = []
+window_size = 50  # For moving average
+reward_history = deque(maxlen=window_size)
 
 while not done:
     action, _ = agent.select_action(state)
     next_state, reward, done, _ = env.step(action)
     state = next_state
     
-    total_reward += reward
-    print(f"Step {step}: Average Queue Length = {-reward:.2f}")
-    step += 1
+    reward_history.append(reward)
+    moving_avg = np.mean(reward_history)
+    moving_avg_rewards.append(moving_avg)
+    
 
 env.close()
 
+# Plot test rewards
+plt.figure(figsize=(12, 6))
+plt.plot(moving_avg_rewards, label=f'Step Reward)')
+plt.xlabel('Episode')
+plt.ylabel('Reward')
+plt.title('A2C Progress')
+plt.legend()
+plt.savefig(f"results/test_curve_scenario_{scenario}.png")
+plt.close()
 print(f"A2C testing completed for {env.scenario_name}. Results saved")
 
 
